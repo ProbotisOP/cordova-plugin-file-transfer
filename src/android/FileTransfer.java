@@ -719,7 +719,7 @@ public class FileTransfer extends CordovaPlugin {
                 File file = null;
                 PluginResult result = null;
                 TrackingInputStream inputStream = null;
-                boolean cached = false;
+                //boolean cached = false; // Removed the cached flag
 
                 OutputStream outputStream = null;
                 try {
@@ -762,13 +762,14 @@ public class FileTransfer extends CordovaPlugin {
                         }
 
                         connection.connect();
-                        if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
-                            cached = true;
-                            connection.disconnect();
-                            LOG.d(LOG_TAG, "Resource not modified: " + source);
-                            JSONObject error = createFileTransferError(NOT_MODIFIED_ERR, source, target, connection, null);
-                            result = new PluginResult(PluginResult.Status.ERROR, error);
-                        } else {
+                        // Remove this block:
+                        //if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) {
+                        //    cached = true;
+                        //    connection.disconnect();
+                        //    LOG.d(LOG_TAG, "Resource not modified: " + source);
+                        //    JSONObject error = createFileTransferError(NOT_MODIFIED_ERR, source, target, connection, null);
+                        //    result = new PluginResult(PluginResult.Status.ERROR, error);
+                        //} else {
                             if (connection.getContentEncoding() == null || connection.getContentEncoding().equalsIgnoreCase("gzip")) {
                                 // Only trust content-length header if we understand
                                 // the encoding -- identity or gzip
@@ -778,10 +779,11 @@ public class FileTransfer extends CordovaPlugin {
                                 }
                             }
                             inputStream = getInputStream(connection);
-                        }
+                        //}
                     }
 
-                    if (!cached) {
+                    // Remove this 'cached' check:
+                    //if (!cached) {
                         try {
                             synchronized (context) {
                                 if (context.aborted) {
@@ -847,7 +849,7 @@ public class FileTransfer extends CordovaPlugin {
                             LOG.e(LOG_TAG, "File plugin not found; cannot save downloaded file");
                             result = new PluginResult(PluginResult.Status.ERROR, "File plugin not found; cannot save downloaded file");
                         }
-                    }
+                    //}
                 } catch (FileNotFoundException e) {
                     JSONObject error = createFileTransferError(FILE_NOT_FOUND_ERR, source, target, connection, e);
                     LOG.e(LOG_TAG, error.toString(), e);
@@ -872,7 +874,8 @@ public class FileTransfer extends CordovaPlugin {
                         result = new PluginResult(PluginResult.Status.ERROR, createFileTransferError(CONNECTION_ERR, source, target, connection, null));
                     }
                     // Remove incomplete download.
-                    if (!cached && result.getStatus() != PluginResult.Status.OK.ordinal() && file != null) {
+                    //if (!cached && result.getStatus() != PluginResult.Status.OK.ordinal() && file != null) {
+                    if (result.getStatus() != PluginResult.Status.OK.ordinal() && file != null) {
                         file.delete();
                     }
                     context.sendPluginResult(result);
